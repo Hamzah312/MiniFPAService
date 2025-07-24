@@ -15,6 +15,7 @@ public class Program
         
         
         builder.Services.AddScoped<MiniFPAService.Repositories.IFinancialRecordRepository, MiniFPAService.Repositories.FinancialRecordRepository>();
+        builder.Services.AddScoped<MiniFPAService.Services.IFinancialRecordService, MiniFPAService.Services.FinancialRecordService>();
         builder.Services.AddScoped<MiniFPAService.Services.IExcelService, MiniFPAService.Services.ExcelService>();
 
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -23,6 +24,13 @@ public class Program
         builder.Services.AddControllers(); 
         builder.Services.AddEndpointsApiExplorer();
         var app = builder.Build();
+
+        // Ensure SQLite database is created if it does not exist
+        using (var scope = app.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<MiniFPAService.Data.ApplicationDbContext>();
+            db.Database.EnsureCreated();
+        }
 
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
